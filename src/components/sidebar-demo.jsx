@@ -20,12 +20,15 @@ export default function SidebarDemo() {
   const [open, setOpen] = useState(false);
 
   const handleLogout = async () => {
-    try {
-      await logout();
-      toastUtils.success.logout();
-      navigate('/');
-    } catch (error) {
-      toastUtils.error.logoutFailed();
+    // Add confirmation dialog
+    if (window.confirm('Are you sure you want to logout?')) {
+      try {
+        await logout();
+        toastUtils.success.logout();
+        navigate('/');
+      } catch (error) {
+        toastUtils.error.logoutFailed();
+      }
     }
   };
 
@@ -62,15 +65,7 @@ export default function SidebarDemo() {
     },
   ];
 
-  // Add logout link if authenticated
-  if (isAuthenticated) {
-    links.push({
-      label: "Logout",
-      href: "#",
-      icon: <LogOut className="h-5 w-5 shrink-0 text-neutral-700" />,
-      onClick: handleLogout,
-    });
-  }
+  // Remove the automatic logout addition to links array
 
   return (
     <Sidebar open={open} setOpen={setOpen}>
@@ -83,13 +78,26 @@ export default function SidebarDemo() {
             ))}
           </div>
         </div>
+        
+        {/* Bottom section with user profile and logout */}
         {isAuthenticated && (
-          <div>
+          <div className="flex flex-col gap-2 border-t border-neutral-200 pt-4">
+            {/* User Profile Link */}
             <SidebarLink
               link={{
                 label: user?.username || "User",
                 href: "/profile",
-                icon: <User />,
+                icon: <User className="h-5 w-5 shrink-0 text-neutral-700" />,
+              }}
+            />
+            
+            {/* Logout Button */}
+            <SidebarLink
+              link={{
+                label: "Logout",
+                href: "#",
+                icon: <LogOut className="h-5 w-5 shrink-0 text-red-600" />,
+                onClick: handleLogout,
               }}
             />
           </div>

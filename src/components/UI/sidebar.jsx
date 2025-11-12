@@ -123,11 +123,19 @@ export const SidebarLink = ({ link, className, ...props }) => {
     }
   };
   
+  // Apply different styles for logout button
+  const isLogout = link.label === "Logout";
+  const linkClassName = cn(
+    "flex items-center justify-start gap-2 group/sidebar py-2",
+    isLogout ? "text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md px-2" : "text-neutral-700 hover:text-neutral-900",
+    className
+  );
+  
   return (
     <a
       href={link.href}
       onClick={handleClick}
-      className={cn("flex items-center justify-start gap-2 group/sidebar py-2", className)}
+      className={linkClassName}
       {...props}
     >
       {link.icon}
@@ -136,7 +144,10 @@ export const SidebarLink = ({ link, className, ...props }) => {
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
-        className="text-neutral-700  text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+        className={cn(
+          "text-sm group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block !p-0 !m-0",
+          isLogout ? "text-red-600" : "text-neutral-700"
+        )}
       >
         {link.label}
       </motion.span>
