@@ -30,14 +30,18 @@ const Login = () => {
         password: formData.password
       });
 
+      console.log('Login result:', result); // Debug log
+
       if (result.success) {
         toastUtils.success.login();
         // Redirect to dashboard or landing page
         navigate('/profile');
       } else {
+        console.log('Login failed:', result.error); // Debug log
         toastUtils.error.loginFailed(result.error);
       }
     } catch (err) {
+      console.log('Login error:', err); // Debug log
       toastUtils.error.loginFailed();
     } finally {
       setIsLoading(false);

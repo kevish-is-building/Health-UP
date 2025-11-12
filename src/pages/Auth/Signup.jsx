@@ -54,14 +54,18 @@ const Signup = () => {
         password: formData.password
       });
 
+      console.log('Register result:', result); // Debug log
+
       if (result.success) {
         toastUtils.success.signup();
         // Redirect to dashboard or landing page
         navigate('/profile');
       } else {
+        console.log('Registration failed:', result.error); // Debug log
         toastUtils.error.signupFailed(result.error);
       }
     } catch (err) {
+      console.log('Registration error:', err); // Debug log
       toastUtils.error.signupFailed();
     } finally {
       setIsLoading(false);

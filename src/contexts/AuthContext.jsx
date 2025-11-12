@@ -58,15 +58,21 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await axiosInstance.post('/auth/login', credentials);
+      console.log('Login response:', response); // Debug log
       
-      if (response.data.success) {
-        const userData = response.data.user;
+      // Handle different response formats - if we get a 200 response, consider it success
+      if (response.status === 200 || response.status === 201) {
+        const userData = response.data.user || response.data;
         setUser(userData);
         setIsAuthenticated(true);
         localStorage.setItem('user', JSON.stringify(userData));
         return { success: true, user: userData };
+      } else {
+        const errorMessage = response.data?.message || 'Login failed';
+        return { success: false, error: errorMessage };
       }
     } catch (error) {
+      console.log('Login error:', error); // Debug log
       const errorMessage = error.response?.data?.message || 'Login failed';
       return { success: false, error: errorMessage };
     }
@@ -75,15 +81,21 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await axiosInstance.post('/auth/register', userData);
+      console.log('Register response:', response); // Debug log
       
-      if (response.data.success) {
-        const newUser = response.data.user;
+      // Handle different response formats - if we get a 200/201 response, consider it success
+      if (response.status === 200 || response.status === 201) {
+        const newUser = response.data.user || response.data;
         setUser(newUser);
         setIsAuthenticated(true);
         localStorage.setItem('user', JSON.stringify(newUser));
         return { success: true, user: newUser };
+      } else {
+        const errorMessage = response.data?.message || 'Registration failed';
+        return { success: false, error: errorMessage };
       }
     } catch (error) {
+      console.log('Register error:', error); // Debug log
       const errorMessage = error.response?.data?.message || 'Registration failed';
       return { success: false, error: errorMessage };
     }
