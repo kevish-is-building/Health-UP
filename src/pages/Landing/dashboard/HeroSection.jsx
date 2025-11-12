@@ -2,9 +2,12 @@ import React from "react";
 import { MdSportsGymnastics } from "react-icons/md";
 import { FiPlay } from "react-icons/fi";
 import { motion } from "framer-motion";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../../contexts/AuthContext";
 
 const HeroSection = ({ SidebarToggle }) => {
+  const { isAuthenticated } = useAuth();
+  
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -26,6 +29,17 @@ const HeroSection = ({ SidebarToggle }) => {
 
   return (
     <div className="relative overflow-hidden">
+      {/* Top Navigation with Auth Button */}
+      {!isAuthenticated && (
+        <div className="absolute top-4 right-4 z-10">
+          <Link to="/auth">
+            <button className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-200">
+              Login / Sign Up
+            </button>
+          </Link>
+        </div>
+      )}
+      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           {/* Left content */}
@@ -58,20 +72,36 @@ const HeroSection = ({ SidebarToggle }) => {
                 variants={itemVariants}
                 className="mt-8 flex flex-wrap gap-4"
               >
-                <Link to="/workouts">
-                  <button
-                    onClick={SidebarToggle}
-                    className="px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-200 cursor-pointer"
-                  >
-                    Get Started
-                  </button>
-                </Link>
-                <Link to="/challenges">
-                <button className="px-6 py-3 bg-white text-emerald-600 font-medium rounded-lg shadow-sm border border-emerald-200 hover:bg-emerald-50 transition-all duration-200 flex items-center cursor-pointer">
-                  <MdSportsGymnastics className="h-4 w-4 mr-2"/>
-                  Take a Challenge
-                </button>
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <Link to="/workouts">
+                      <button
+                        onClick={SidebarToggle}
+                        className="px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-200 cursor-pointer"
+                      >
+                        Go to Workouts
+                      </button>
+                    </Link>
+                    <Link to="/challenges">
+                      <button className="px-6 py-3 bg-white text-emerald-600 font-medium rounded-lg shadow-sm border border-emerald-200 hover:bg-emerald-50 transition-all duration-200 flex items-center cursor-pointer">
+                        <MdSportsGymnastics className="h-4 w-4 mr-2"/>
+                        Take a Challenge
+                      </button>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/auth">
+                      <button className="px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg shadow-md hover:bg-emerald-700 transition-all duration-200 cursor-pointer">
+                        Get Started
+                      </button>
+                    </Link>
+                    <button className="px-6 py-3 bg-white text-emerald-600 font-medium rounded-lg shadow-sm border border-emerald-200 hover:bg-emerald-50 transition-all duration-200 flex items-center cursor-pointer">
+                      <FiPlay className="h-4 w-4 mr-2"/>
+                      Learn More
+                    </button>
+                  </>
+                )}
               </motion.div>
             </motion.div>
           </div>

@@ -7,12 +7,28 @@ import { CgGym } from "react-icons/cg";
 import { IoIosNutrition } from "react-icons/io";
 import { BsPeople } from "react-icons/bs";
 import { GoTrophy } from "react-icons/go";
-import { BarChart2, Users, User } from "lucide-react";
-
+import { BarChart2, Users, User, LogOut } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { toastUtils } from "../lib/toastUtils";
 
 import { motion } from "framer-motion";
 
 export default function SidebarDemo() {
+  const { user, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toastUtils.success.logout();
+      navigate('/');
+    } catch (error) {
+      toastUtils.error.logoutFailed();
+    }
+  };
+
   const links = [
     {
       label: "Home",
@@ -44,13 +60,18 @@ export default function SidebarDemo() {
       href: "/leaderboard",
       icon: <BarChart2 className="h-5 w-5 shrink-0 text-neutral-700" />,
     },
-    {
-      label: "Logout",
-      href: "/",
-      icon: <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700" />,
-    },
   ];
-  const [open, setOpen] = useState(false);
+
+  // Add logout link if authenticated
+  if (isAuthenticated) {
+    links.push({
+      label: "Logout",
+      href: "#",
+      icon: <LogOut className="h-5 w-5 shrink-0 text-neutral-700" />,
+      onClick: handleLogout,
+    });
+  }
+
   return (
     <Sidebar open={open} setOpen={setOpen}>
       <SidebarBody className="justify-between gap-10">
@@ -62,15 +83,17 @@ export default function SidebarDemo() {
             ))}
           </div>
         </div>
-        <div>
-          <SidebarLink
-            link={{
-              label: "Dummy User",
-              href: "/profile",
-              icon: <User />,
-            }}
-          />
-        </div>
+        {isAuthenticated && (
+          <div>
+            <SidebarLink
+              link={{
+                label: user?.username || "User",
+                href: "/profile",
+                icon: <User />,
+              }}
+            />
+          </div>
+        )}
       </SidebarBody>
     </Sidebar>
   );

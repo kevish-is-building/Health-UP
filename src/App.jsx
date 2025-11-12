@@ -8,7 +8,7 @@ function App({ children }) {
         <SidebarDemo />
       </div>
 
-      <main className="flex-1 flex flex-col bg-emerald-100 min-h-screen h-fit  pl-[3rem]">
+      <main className="flex-1 flex flex-col bg-emerald-100 min-h-screen h-fit  pl-12">
         {children}
       </main>
     </div>

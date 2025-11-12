@@ -8,19 +8,51 @@ import Challenges from './pages/Challenges/Challenges.jsx'
 import { Routes, Route } from 'react-router-dom'
 import Leaderboard from './pages/Leaderboard/Leaderboard.jsx'
 import Dashboard  from "./pages/Dashboard/Dashboard.jsx"
+import Auth from './pages/Auth/Auth.jsx'
+import ProtectedRoute from './components/ProtectedRoute.jsx'
 
 export default function Layout() {
   return (
-    <App>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/workouts" element={<Workouts />} />
-        <Route path="/nutrition" element={<Nutrition />} />
-        <Route path="/community" element={<Community />} />
-        <Route path="/challenges" element={<Challenges />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/profile" element={<Dashboard />} />
-      </Routes>
-    </App>
+    <Routes>
+      {/* Auth routes - without App wrapper */}
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/login" element={<Auth />} />
+      <Route path="/signup" element={<Auth />} />
+      
+      {/* Public routes - with App wrapper */}
+      <Route path="/" element={<App><Landing /></App>} />
+      
+      {/* Protected routes - with App wrapper and authentication */}
+      <Route path="/workouts" element={
+        <ProtectedRoute>
+          <App><Workouts /></App>
+        </ProtectedRoute>
+      } />
+      <Route path="/nutrition" element={
+        <ProtectedRoute>
+          <App><Nutrition /></App>
+        </ProtectedRoute>
+      } />
+      <Route path="/community" element={
+        <ProtectedRoute>
+          <App><Community /></App>
+        </ProtectedRoute>
+      } />
+      <Route path="/challenges" element={
+        <ProtectedRoute>
+          <App><Challenges /></App>
+        </ProtectedRoute>
+      } />
+      <Route path="/leaderboard" element={
+        <ProtectedRoute>
+          <App><Leaderboard /></App>
+        </ProtectedRoute>
+      } />
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <App><Dashboard /></App>
+        </ProtectedRoute>
+      } />
+    </Routes>
   )
 }
