@@ -101,6 +101,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (credentialResponse) => {
+    try {
+      console.log("---->>>>>.", credentialResponse)
+      const response = await axiosInstance.post('/auth/google', {
+        token: credentialResponse.credential
+      });
+      console.log('Google login response:', response); // Debug log
+      
+      if (response.status === 200 || response.status === 201) {
+        const userData = response.data.user || response.data;
+        setUser(userData);
+        setIsAuthenticated(true);
+        localStorage.setItem('user', JSON.stringify(userData));
+        return { success: true, user: userData };
+      } else {
+        const errorMessage = response.data?.message || 'Google login failed';
+        return { success: false, error: errorMessage };
+      }
+    } catch (error) {
+      console.log('Google login error:', error); // Debug log
+      const errorMessage = error.response?.data?.message || 'Google login failed';
+      return { success: false, error: errorMessage };
+    }
+  };
+
   const logout = async () => {
     try {
       await axiosInstance.post('/auth/logout');
@@ -125,7 +150,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    updateUser
+    updateUser,
+    googleLogin
   };
 
   return (
