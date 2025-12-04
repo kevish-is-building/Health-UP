@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAuth } from "../../../contexts/AuthContext"
 import { AnimatePresence } from "framer-motion"
+import { toastUtils } from "../../../lib/toastUtils"
 import Header from "./Header"
 import Stats from "./Stats"
 import FeaturedPrograms from "./FeaturedPrograms"
@@ -120,6 +122,11 @@ export default function WorkoutLibrary() {
     achievements: 0,
   })
 
+  // Workouts from backend
+  const [workouts, setWorkouts] = useState([])
+  const [isLoadingWorkouts, setIsLoadingWorkouts] = useState(false)
+  const { user, isAuthenticated } = useAuth()
+
   // Animate stats on component mount
   useEffect(() => {
     const targetStats = {
@@ -154,6 +161,32 @@ export default function WorkoutLibrary() {
     return () => clearInterval(timer)
   }, [])
 
+  // Fetch workouts for the logged-in user
+  useEffect(() => {
+    const fetchWorkouts = async () => {
+      if (!isAuthenticated) {
+        setWorkouts([])
+        return
+      }
+
+      setIsLoadingWorkouts(true)
+      try {
+        const { default: api } = await import("../../../lib/workouts")
+        const data = await api.getWorkouts({ page: 1, limit: 50 })
+        // Expect data to be { items: [], meta: {} } or an array
+        const raw = data.items || data.workouts || data || []
+        const items = raw.map((it) => ({ ...it, id: it.id || it._id }))
+        setWorkouts(items)
+      } catch (err) {
+        console.error('Failed to load workouts', err)
+      } finally {
+        setIsLoadingWorkouts(false)
+      }
+    }
+
+    fetchWorkouts()
+  }, [isAuthenticated])
+
   // Filter exercises based on search query
   const filteredExercises = exercises.filter(
     (exercise) =>
@@ -173,8 +206,21 @@ export default function WorkoutLibrary() {
       {/* Stats Component */}
       <Stats stats={stats} />
       
-      {/* Exercise Library Component */}
-      <ExerciseLibrary exercises={filteredExercises} onViewExercise={(exercise) => setSelectedExercise(exercise)} />
+      {/* Exercise Library Component - if user has workouts show them, otherwise show default library */}
+      {isLoadingWorkouts ? (
+        <div className="py-8 text-center text-gray-500">Loading workouts...</div>
+      ) : (
+        <>
+          {isAuthenticated && workouts.length === 0 ? (
+            <div className="py-8 text-center text-gray-600">You don't have any saved workouts yet. Create one to see it here.</div>
+          ) : (
+            <ExerciseLibrary
+              exercises={workouts.length > 0 ? workouts : filteredExercises}
+              onViewExercise={(exercise) => setSelectedExercise(exercise)}
+            />
+          )}
+        </>
+      )}
 
       {/* Featured Programs Component */}
       <FeaturedPrograms programs={featuredPrograms} onViewProgram={(program) => setSelectedProgram(program)} />
@@ -185,9 +231,22 @@ export default function WorkoutLibrary() {
         {showCreateModal && (
           <CreateWorkoutModal
             onClose={() => setShowCreateModal(false)}
-            onSave={() => {
-              setShowCreateModal(false)
-              alert("Workout created successfully!")
+            onCreate={async (payload) => {
+              try {
+                const { createWorkout } = await import("../../../lib/workouts")
+                await createWorkout(payload)
+                // refresh
+                const { default: api } = await import("../../../lib/workouts")
+                const data = await api.getWorkouts({ page: 1, limit: 50 })
+                const raw2 = data.items || data.workouts || data || []
+                const items2 = raw2.map((it) => ({ ...it, id: it.id || it._id }))
+                setWorkouts(items2)
+                setShowCreateModal(false)
+                toastUtils.success.workoutSaved()
+              } catch (err) {
+                console.error('Create workout failed', err)
+                toastUtils.error.saveFailed('Workout')
+              }
             }}
           />
         )}
